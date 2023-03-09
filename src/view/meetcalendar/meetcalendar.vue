@@ -1,19 +1,18 @@
 <template>
   <div>
-    <el-collapse v-model="activeNames">
-      <el-collapse-item title="  数据列表" name="1">
-        <div class="gva-search-box">
+    <!--         <div class="gva-search-box">
+
           <el-form
             :inline="true"
             :model="searchInfo"
             class="demo-form-inline"
             @keyup.enter="onSubmit"
           >
-            <!--       <el-form-item label="创建时间">
+             <el-form-item label="创建时间">
       <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="开始时间"></el-date-picker>
        —
       <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="结束时间"></el-date-picker>
-      </el-form-item> -->
+      </el-form-item>
             <el-form-item label="会议日期">
               <el-date-picker
                 v-model="searchInfo.startMDate"
@@ -263,22 +262,73 @@
               @size-change="handleSizeChange"
             />
           </div>
-        </div>
-      </el-collapse-item>
-      <el-collapse-item title="  日程表" name="2">
-        <div>
-          <el-calendar v-model="dateMonth">
-            <template #dateCell="{ data }">
-              <p :class="data.isSelected ? 'is-selected' : ''">
-                {{ data.day.split("-").slice(1).join("-") }}
-                {{ data.isSelected ? "✔️" : "" }}
-                <div v-for="(item,index) in filterByDay(data.day)" :key="index">{{ index+1 }}--{{ item.mRoom }}</div>
-              </p>
-            </template>
-          </el-calendar>
-        </div>
-      </el-collapse-item>
-    </el-collapse>
+        </div> -->
+    <div>
+      <el-card class="box-card">
+        <el-row>
+          <el-col :span="6">
+            <el-statistic title="本月会议总量" :value="352" />
+          </el-col>
+          <el-col :span="6">
+            <el-statistic :value="138">
+              <template #title>
+                <div style="display: inline-flex; align-items: center">
+                  视频会/接待会
+                  <el-icon style="margin-left: 4px" :size="12">
+                    <ChatLineRound />
+                  </el-icon>
+                </div>
+              </template>
+              <template #suffix>/100</template>
+            </el-statistic>
+          </el-col>
+          <el-col :span="6">
+            <el-statistic title="会议时长min" :value="172000" />
+          </el-col>
+          <el-col :span="6">
+            <el-statistic title="还没想好" :value="562">
+              <template #suffix>
+                <el-icon style="vertical-align: -0.125em">
+                  <ChatLineRound />
+                </el-icon>
+              </template>
+            </el-statistic>
+          </el-col>
+        </el-row>
+      </el-card>
+      <el-card class="box-card">
+        <el-button
+          class="add-button"
+          size="small"
+          type="primary"
+          icon="plus"
+          @click="openDialog"
+          >新增</el-button
+        >
+        <el-calendar v-model="dateMonth">
+          <template #date-cell="{ data }">
+            <p :class="data.isSelected ? 'is-selected' : ''">
+              <el-row>
+                <el-col :span="8">
+                  {{ data.day.split("-").slice(1).join("-") }}</el-col
+                >
+                <el-col :span="8"> {{ data.isSelected ? "✔️" : "" }}</el-col>
+              </el-row>
+              <el-tag
+                type="success"
+                v-for="(item, index) in filterByDay(data.day)"
+                :key="index"
+                closable
+                @close="deleteRow(item)"
+                @click="updateMeetcalendarFunc(item)"
+              >
+                {{ index + 1 }}--{{ item.mRoom }}
+              </el-tag>
+            </p>
+          </template>
+        </el-calendar>
+      </el-card>
+    </div>
 
     <el-dialog
       v-model="dialogFormVisible"
@@ -290,7 +340,7 @@
         label-position="right"
         ref="elFormRef"
         :rules="rule"
-        label-width="80px"
+        label-width="100px"
       >
         <el-form-item label="会议日期:" prop="mDate">
           <el-date-picker
@@ -309,11 +359,34 @@
           />
         </el-form-item>
         <el-form-item label="会议类型:" prop="mType">
-          <el-input
+          <!-- <el-input
             v-model="formData.mType"
             :clearable="true"
             placeholder="请输入"
-          />
+          /> -->
+          <el-select v-model="formData.mType" class="m-2" placeholder="选择会议类型">
+            <el-option
+              v-for="item in meetoptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item v-if="formData.mType==='视频会'" label="会议线路:" prop="route">
+<!--           <el-input
+            v-model="formData.route"
+            :clearable="true"
+            placeholder="请输入"
+          /> -->
+          <el-select v-model="formData.route"  class="m-2" placeholder="选择视频线路">
+            <el-option
+              v-for="item in routeoptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="会议名称:" prop="title">
           <el-input
@@ -325,7 +398,7 @@
         <el-form-item label="开始时间:" prop="stime">
           <el-date-picker
             v-model="formData.stime"
-            type="date"
+            type="datetime"
             style="width: 100%"
             placeholder="选择日期"
             :clearable="true"
@@ -338,7 +411,7 @@
             placeholder="请输入"
           />
         </el-form-item>
-        <el-form-item label="上级领导:" prop="leader">
+        <el-form-item  v-if="formData.mType !=='本地会'" label="上级领导:" prop="leader">
           <el-input
             v-model="formData.leader"
             :clearable="true"
@@ -369,13 +442,6 @@
         <el-form-item label="责任单位:" prop="resposen">
           <el-input
             v-model="formData.resposen"
-            :clearable="true"
-            placeholder="请输入"
-          />
-        </el-form-item>
-        <el-form-item label="会议线路:" prop="route">
-          <el-input
-            v-model="formData.route"
             :clearable="true"
             placeholder="请输入"
           />
@@ -424,7 +490,7 @@ import {
   filterDict,
 } from "@/utils/format";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { ref, reactive, watch} from "vue";
+import { ref, reactive, watch } from "vue";
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
@@ -499,51 +565,65 @@ getTableData();
 
 // ============== 表格控制部分结束 ===============
 
-const activeNames = ref(["2"]);
-
 //===============calendar控制部分===========
 
 const dateMonth = ref(new Date());
 const todaylist = ref([]);
-console.log(dateMonth);
 
-watch(dateMonth, async () => {
+const getmonthlist = async () => {
   // 获取当前月份的第一天
-const firstDay = ref(new Date(dateMonth.value.getFullYear(), dateMonth.value.getMonth(), 1));
+  const firstDay = ref(
+    new Date(dateMonth.value.getFullYear(), dateMonth.value.getMonth(), 1)
+  );
   // 获取当前月份最后一天
-const lastDay = ref(new Date(dateMonth.value.getFullYear(), dateMonth.value.getMonth() + 1, 0, 23, 59, 59));
-const daylistinfo = ref({});//创建一个对象，用作查询参数
+  const lastDay = ref(
+    new Date(
+      dateMonth.value.getFullYear(),
+      dateMonth.value.getMonth() + 1,
+      0,
+      23,
+      59,
+      59
+    )
+  );
+  const daylistinfo = ref({}); //创建一个对象，用作查询参数
 
-//经过一些复杂的变换，具体是chatgpt帮我改的
-var offset = firstDay.value.getTimezoneOffset() * 60000;
-daylistinfo.value.startMDate = (new Date(firstDay.value - offset)).toISOString();
-offset = lastDay.value.getTimezoneOffset() * 60000;
-daylistinfo.value.endMDate = (new Date(lastDay.value - offset)).toISOString()
-//console.log(daylistinfo);
+  //经过一些复杂的变换，具体是chatgpt帮我改的
+  var offset = firstDay.value.getTimezoneOffset() * 60000;
+  daylistinfo.value.startMDate = new Date(
+    firstDay.value - offset
+  ).toISOString();
+  offset = lastDay.value.getTimezoneOffset() * 60000;
+  daylistinfo.value.endMDate = new Date(lastDay.value - offset).toISOString();
+  //console.log(daylistinfo);
 
-const data = await getMeetcalendarList({
-    page: 1,//后面如果需要在日历单元格内分页的话，可以用到
-    pageSize: 100,//因为用不到分页，所以这里是目前每天事件的上限
+  const data = await getMeetcalendarList({
+    page: 1, //后面如果需要在日历单元格内分页的话，可以用到
+    pageSize: 100, //因为用不到分页，所以这里是目前每天事件的上限
     ...daylistinfo.value,
   });
-  console.log(data.data.list);
+  //console.log(data.data.list);
+  //console.log(dateMonth.value);
   todaylist.value = data.data.list;
-}, { immediate: true })
+};
 
-const filterByDay=(day)=>{
-    const date = new Date(day);
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const dayOfMonth = date.getDate();
+watch(dateMonth, getmonthlist, { immediate: true });
 
-    return todaylist.value.filter(item => {
-      const itemDate = new Date(item.mDate);
-      return itemDate.getFullYear() === year &&
-             itemDate.getMonth() === month &&
-             itemDate.getDate() === dayOfMonth;
-    });
-  }
+const filterByDay = (day) => {
+  const date = new Date(day);
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const dayOfMonth = date.getDate();
 
+  return todaylist.value.filter((item) => {
+    const itemDate = new Date(item.mDate);
+    return (
+      itemDate.getFullYear() === year &&
+      itemDate.getMonth() === month &&
+      itemDate.getDate() === dayOfMonth
+    );
+  });
+};
 
 /* const theday = async (data)=>{
   const date = new Date(data.day);//将当天时间转换为Date对象
@@ -563,7 +643,61 @@ const filterByDay=(day)=>{
   return today
 } */
 
+//===============弹窗内容控制部分=======
+const meetoptions = [
+  {
+    value: "本地会",
+    label: "本地会",
+  },
+  {
+    value: "视频会",
+    label: "视频会",
+  },
+  {
+    value: "接待会",
+    label: "接待会",
+  },
+  {
+    value: "借用",
+    label: "借用",
+  },
+  {
+    value: "其他",
+    label: "其他",
+  },
+];
 
+const routeoptions = [
+  {
+    value: "zytx",
+    label: "zytx",
+  },
+  {
+    value: "联通线路",
+    label: "联通线路",
+  },
+  {
+    value: "全省综合会议系统",
+    label: "全省综合会议系统",
+  },
+  {
+    value: "山东通",
+    label: "山东通",
+  },
+  {
+    value: "会商系统",
+    label: "会商系统",
+  },
+  {
+    value: "人社专线",
+    label: "人社专线",
+  },  
+  {
+    value: "其他",
+    label: "其他",
+  },
+
+];
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async () => {};
 
@@ -643,7 +777,9 @@ const deleteMeetcalendarFunc = async (row) => {
     if (tableData.value.length === 1 && page.value > 1) {
       page.value--;
     }
-    getTableData();
+    //getTableData();
+    
+    getmonthlist();
   }
 };
 
@@ -697,7 +833,8 @@ const enterDialog = async () => {
         message: "创建/更改成功",
       });
       closeDialog();
-      getTableData();
+      //getTableData();
+      getmonthlist();
     }
   });
 };
@@ -710,5 +847,18 @@ const enterDialog = async () => {
 .el-calendar-table .el-calendar-day {
   min-height: 100px;
   height: auto;
+}
+.box-card {
+  padding: 10px 20px;
+  margin-bottom: 10px;
+}
+.el-tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 3px;
+}
+.add-button {
+  margin-left: 20px;
 }
 </style>

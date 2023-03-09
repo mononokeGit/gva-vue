@@ -329,6 +329,7 @@ const enterAddUserDialog = async() => {
       }
       if (dialogFlag.value === 'edit') {
         const res = await setUserInfo(req)
+        console.log(req);
         if (res.code === 0) {
           ElMessage({ type: 'success', message: '编辑成功' })
           await getTableData()
