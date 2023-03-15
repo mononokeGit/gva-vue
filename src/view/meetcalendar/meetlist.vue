@@ -50,17 +50,7 @@
                 placeholder="搜索条件（止）"
               ></el-date-picker>
             </el-form-item>
-            <el-form-item label="会议时长">
-              <el-input
-                v-model.number="searchInfo.startPtime"
-                placeholder="搜索条件（起）"
-              />
-              —
-              <el-input
-                v-model.number="searchInfo.endPtime"
-                placeholder="搜索条件（止）"
-              />
-            </el-form-item>
+            
             <el-form-item label="上级领导">
               <el-input v-model="searchInfo.leader" placeholder="搜索条件" />
             </el-form-item>
@@ -85,6 +75,23 @@
             <el-form-item label="备注">
               <el-input v-model="searchInfo.remark" placeholder="搜索条件" />
             </el-form-item>
+            <el-row>
+              <el-form-item label="会议时长">
+                <el-col :span="10">
+                  <el-input
+                    v-model.number="searchInfo.startPtime"
+                    placeholder="搜索条件（起）"
+                  />
+                </el-col>
+                <el-col :span="1">—</el-col>
+                <el-col :span="10">
+                  <el-input
+                    v-model.number="searchInfo.endPtime"
+                    placeholder="搜索条件（止）"
+                  />
+                </el-col>
+              </el-form-item>
+            </el-row>
             <el-form-item>
               <el-button
                 size="small"
@@ -146,13 +153,13 @@
             row-key="ID"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column type="selection" width="55" />
+            <el-table-column type="selection" width="auto" />
 <!--             <el-table-column align="left" label="日期" width="180">
               <template #default="scope">{{
                 formatDate(scope.row.CreatedAt)
               }}</template>
             </el-table-column> -->
-            <el-table-column align="left" label="会议日期" width="180">
+            <el-table-column align="left" label="会议日期" width="160">
               <template #default="scope">{{
                 formatDate(scope.row.mDate)
               }}</template>
@@ -161,21 +168,22 @@
               align="left"
               label="会议室"
               prop="mRoom"
-              width="120"
+              width="auto"
             />
             <el-table-column
               align="left"
               label="会议类型"
               prop="mType"
-              width="120"
+              width="auto"
             />
             <el-table-column
               align="left"
               label="会议名称"
               prop="title"
-              width="120"
+              width="auto"
+              show-overflow-tooltip="true"
             />
-            <el-table-column align="left" label="开始时间" width="180">
+            <el-table-column align="left" label="开始时间" width="auto" show-overflow-tooltip="true">
               <template #default="scope">{{
                 formatDate(scope.row.stime)
               }}</template>
@@ -184,51 +192,55 @@
               align="left"
               label="会议时长"
               prop="ptime"
-              width="120"
+              width="auto"
             />
             <el-table-column
               align="left"
               label="上级领导"
               prop="leader"
-              width="120"
+              width="auto"
+              show-overflow-tooltip="true"
             />
             <el-table-column
               align="left"
               label="我区参会领导"
               prop="mleader"
               width="120"
+              show-overflow-tooltip="true"
             />
             <el-table-column
               align="left"
               label="参会人数"
               prop="amount"
-              width="120"
+              width="auto"
             />
             <el-table-column
               align="left"
               label="会议等级"
               prop="level"
-              width="120"
+              width="auto"
             />
             <el-table-column
               align="left"
               label="责任单位"
               prop="resposen"
-              width="120"
+              width="auto"
+              show-overflow-tooltip="true"
             />
             <el-table-column
               align="left"
               label="会议线路"
               prop="route"
-              width="120"
+              width="auto"
+              show-overflow-tooltip="true"
             />
             <el-table-column
               align="left"
               label="备注"
               prop="remark"
-              width="120"
+              width="auto"
             />
-            <el-table-column align="left" label="按钮组">
+            <el-table-column align="left" label="按钮组" width="130">
               <template #default="scope">
                 <el-button
                   type="primary"
@@ -273,7 +285,7 @@
         label-position="right"
         ref="elFormRef"
         :rules="rule"
-        label-width="80px"
+        label-width="120px"
       >
         <el-form-item label="会议日期:" prop="mDate">
           <el-date-picker

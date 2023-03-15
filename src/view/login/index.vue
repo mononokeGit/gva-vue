@@ -8,7 +8,7 @@
             :src="$GIN_VUE_ADMIN.appLogo"
             alt
           >
-          <p class="login_panel_form_title_p">{{ $GIN_VUE_ADMIN.appName }}</p>
+          <p >高新党政办</p>
         </div>
         <el-form
           ref="loginForm"
@@ -66,7 +66,7 @@
         </el-form>
       </div>
       <div class="login_panel_right" />
-      <div class="login_panel_foot">
+      <!-- <div class="login_panel_foot">
         <div class="links">
           <a href="http://doc.henrongyi.top/" target="_blank">
             <img src="@/assets/docs.png" class="link-icon" alt="文档">
@@ -85,9 +85,8 @@
           </a>
         </div>
         <div class="copyright">
-          <BottomInfo />
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -101,7 +100,6 @@ export default {
 <script setup>
 import { captcha } from '@/api/user'
 import { checkDB } from '@/api/initdb'
-import BottomInfo from '@/view/layout/bottomInfo/bottomInfo.vue'
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
@@ -143,7 +141,7 @@ loginVerify()
 const loginForm = ref(null)
 const picPath = ref('')
 const loginFormData = reactive({
-  username: 'admin',
+  username: '',
   password: '',
   captcha: '',
   captchaId: '',
@@ -203,4 +201,8 @@ const checkInit = async() => {
 
 <style lang="scss" scoped>
 @import "@/style/newLogin.scss";
+
+p {
+  font-size: 35px;
+}
 </style>

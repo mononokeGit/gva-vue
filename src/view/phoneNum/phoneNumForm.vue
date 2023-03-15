@@ -2,7 +2,8 @@
   <div>
     <div class="gva-form-box">
       <el-form :model="formData" ref="elFormRef" label-position="right" :rules="rule" label-width="80px">
-        <el-form-item label="标识符:" prop="uid">
+        <el-row>
+          <el-form-item label="标识符:" prop="uid">
           <el-input v-model="formData.uid" :clearable="true" placeholder="请输入" />
         </el-form-item>
         <el-form-item label="备注:" prop="nOther">
@@ -21,6 +22,9 @@
           <el-button size="small" type="primary" @click="save">保存</el-button>
           <el-button size="small" type="primary" @click="back">返回</el-button>
         </el-form-item>
+
+        </el-row>
+        
       </el-form>
     </div>
   </div>

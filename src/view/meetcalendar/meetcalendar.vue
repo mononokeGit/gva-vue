@@ -315,14 +315,14 @@
                 <el-col :span="8"> {{ data.isSelected ? "✔️" : "" }}</el-col>
               </el-row>
               <el-tag
-                type="success"
+                :type="tagcolors[item.mType]"
                 v-for="(item, index) in filterByDay(data.day)"
                 :key="index"
                 closable
                 @close="deleteRow(item)"
                 @click="updateMeetcalendarFunc(item)"
               >
-                {{ index + 1 }}--{{ item.mRoom }}
+                {{ index + 1 }}--{{ item.mRoom }}--{{ item.title }}--{{ item.mType }}
               </el-tag>
             </p>
           </template>
@@ -334,7 +334,10 @@
       v-model="dialogFormVisible"
       :before-close="closeDialog"
       title="弹窗操作"
+      width="80%"
     >
+    <el-row>
+      <el-col :span="7">
       <el-form
         :model="formData"
         label-position="right"
@@ -409,7 +412,7 @@
             v-model.number="formData.ptime"
             :clearable="true"
             placeholder="请输入"
-          />
+          > <template #append>分钟</template></el-input>
         </el-form-item>
         <el-form-item  v-if="formData.mType !=='本地会'" label="上级领导:" prop="leader">
           <el-input
@@ -454,6 +457,12 @@
           />
         </el-form-item>
       </el-form>
+    </el-col>
+    <el-col :span="1"></el-col>
+    <el-col :span="16">
+    <leaderlistVue />
+    </el-col>
+    </el-row>
       <template #footer>
         <div class="dialog-footer">
           <el-button size="small" @click="closeDialog">取 消</el-button>
@@ -491,6 +500,8 @@ import {
 } from "@/utils/format";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { ref, reactive, watch } from "vue";
+
+import leaderlistVue from '../leader/leaderlist.vue';
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
@@ -698,6 +709,17 @@ const routeoptions = [
   },
 
 ];
+
+
+//==============tag控制部分===============
+const tagcolors = reactive({
+  '本地会':'',
+  '视频会':'danger',
+  '接待会':'success',
+  '借用':'warning',
+  '其他':'info'
+});
+
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async () => {};
 
