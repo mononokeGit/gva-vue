@@ -65,7 +65,14 @@ export default ({
           target: `${process.env.VITE_BASE_PATH}:${process.env.VITE_SERVER_PORT}/`, // 代理到 目标路径
           changeOrigin: true,
           rewrite: path => path.replace(new RegExp('^' + process.env.VITE_BASE_API), ''),
-        }
+        },
+        '/wxapi': {
+          target: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=58513314-f3db-4a06-93e9-5c31bbfda9d0',
+          changeOrigin: true,
+          secure: false,
+          // eslint-disable-next-line no-shadow
+          rewrite: (path) => path.replace(/^\/wxapi/, '')
+        },
       },
     },
     build: {
