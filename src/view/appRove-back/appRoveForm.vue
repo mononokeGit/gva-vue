@@ -72,7 +72,7 @@
           <el-input v-model="formData.appres2" :clearable="true" placeholder="请输入" />
         </el-form-item> -->
         <el-form-item style="display: flex; justify-content: center">
-          <el-button size="small" type="primary" @click="save">提交</el-button>
+          <el-button size="small" type="primary" @click="save">提交123123</el-button>
           <el-button size="small" type="primary" @click="back">返回</el-button>
         </el-form-item>
       </el-form>
@@ -157,7 +157,7 @@ const save = async () => {
         .post("/wxapi", {
           msgtype: "text",
           text: {
-            content: 
+            content:
 `会议室申请：
 申请人/单位：${formData.value.appunit}\n
 使用领导：${formData.value.appleader}\n
