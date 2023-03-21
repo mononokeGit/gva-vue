@@ -50,7 +50,7 @@
                 placeholder="搜索条件（止）"
               ></el-date-picker>
             </el-form-item>
-            
+
             <el-form-item label="上级领导">
               <el-input v-model="searchInfo.leader" placeholder="搜索条件" />
             </el-form-item>
@@ -181,9 +181,10 @@
               label="会议名称"
               prop="title"
               width="auto"
-              show-overflow-tooltip="true"
+              :show-overflow-tooltip="true"
             />
-            <el-table-column align="left" label="开始时间" width="auto" show-overflow-tooltip="true">
+            <el-table-column align="left" label="开始时间" width="auto"
+                             :show-overflow-tooltip="true">
               <template #default="scope">{{
                 formatDate(scope.row.stime)
               }}</template>
@@ -199,14 +200,14 @@
               label="上级领导"
               prop="leader"
               width="auto"
-              show-overflow-tooltip="true"
+              :show-overflow-tooltip="true"
             />
             <el-table-column
               align="left"
               label="我区参会领导"
               prop="mleader"
               width="120"
-              show-overflow-tooltip="true"
+              :show-overflow-tooltip="true"
             />
             <el-table-column
               align="left"
@@ -225,14 +226,14 @@
               label="责任单位"
               prop="resposen"
               width="auto"
-              show-overflow-tooltip="true"
+              :show-overflow-tooltip="true"
             />
             <el-table-column
               align="left"
               label="会议线路"
               prop="route"
               width="auto"
-              show-overflow-tooltip="true"
+              :show-overflow-tooltip="true"
             />
             <el-table-column
               align="left"

@@ -16,12 +16,12 @@
 
         </el-form-item>
         <el-form-item label="会议室">
-
+            
              <el-input v-model.number="searchInfo.approom" placeholder="搜索条件" />
 
         </el-form-item>
         <el-form-item label="参会人数">
-
+            
              <el-input v-model.number="searchInfo.appamount" placeholder="搜索条件" />
 
         </el-form-item>
@@ -30,7 +30,7 @@
 
         </el-form-item>
         <el-form-item label="使用时间">
-
+            
             <el-date-picker v-model="searchInfo.startApptime" type="datetime" placeholder="搜索条件（起）"></el-date-picker>
             —
             <el-date-picker v-model="searchInfo.endApptime" type="datetime" placeholder="搜索条件（止）"></el-date-picker>
@@ -41,11 +41,19 @@
 
         </el-form-item>
         <el-form-item label="备注">
-         <el-input v-model="searchInfo.appres1" placeholder="搜索条件" />
+         <el-input v-model="searchInfo.appremarks" placeholder="搜索条件" />
 
         </el-form-item>
         <el-form-item label="审批状态">
-         <el-input v-model="searchInfo.appres2" placeholder="搜索条件" />
+         <el-input v-model="searchInfo.appstatus" placeholder="搜索条件" />
+
+        </el-form-item>
+        <el-form-item label="审批意见">
+         <el-input v-model="searchInfo.appopinion" placeholder="搜索条件" />
+
+        </el-form-item>
+        <el-form-item label="其他">
+         <el-input v-model="searchInfo.appother" placeholder="搜索条件" />
 
         </el-form-item>
         <el-form-item>
@@ -89,8 +97,10 @@
             <template #default="scope">{{ formatDate(scope.row.apptime) }}</template>
          </el-table-column>
         <el-table-column align="left" label="是否需要设备" prop="appdevice" width="120" />
-        <el-table-column align="left" label="备注" prop="appres1" width="120" />
-        <el-table-column align="left" label="审批状态" prop="appres2" width="120" />
+        <el-table-column align="left" label="备注" prop="appremarks" width="120" />
+        <el-table-column align="left" label="审批状态" prop="appstatus" width="120" />
+        <el-table-column align="left" label="审批意见" prop="appopinion" width="120" />
+        <el-table-column align="left" label="其他" prop="appother" width="120" />
         <el-table-column align="left" label="按钮组">
             <template #default="scope">
             <el-button type="primary" link icon="edit" size="small" class="table-button" @click="updateApproveFunc(scope.row)">变更</el-button>
@@ -133,11 +143,17 @@
         <el-form-item label="是否需要设备:"  prop="appdevice" >
           <el-input v-model="formData.appdevice" :clearable="true"  placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="备注:"  prop="appres1" >
-          <el-input v-model="formData.appres1" :clearable="true"  placeholder="请输入" />
+        <el-form-item label="备注:"  prop="appremarks" >
+          <el-input v-model="formData.appremarks" :clearable="true"  placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="审批状态:"  prop="appres2" >
-          <el-input v-model="formData.appres2" :clearable="true"  placeholder="请输入" />
+        <el-form-item label="审批状态:"  prop="appstatus" >
+          <el-input v-model="formData.appstatus" :clearable="true"  placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="审批意见:"  prop="appopinion" >
+          <el-input v-model="formData.appopinion" :clearable="true"  placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="其他:"  prop="appother" >
+          <el-input v-model="formData.appother" :clearable="true"  placeholder="请输入" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -180,8 +196,10 @@ const formData = ref({
         apptype: '',
         apptime: new Date(),
         appdevice: '',
-        appres1: '',
-        appres2: '',
+        appremarks: '',
+        appstatus: '',
+        appopinion: '',
+        appother: '',
         })
 
 // 验证规则
@@ -355,8 +373,10 @@ const closeDialog = () => {
         apptype: '',
         apptime: new Date(),
         appdevice: '',
-        appres1: '',
-        appres2: '',
+        appremarks: '',
+        appstatus: '',
+        appopinion: '',
+        appother: '',
         }
 }
 // 弹窗确定
