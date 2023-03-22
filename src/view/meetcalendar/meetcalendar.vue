@@ -523,7 +523,7 @@ const formData = ref({
 // 验证规则
 const rule = reactive({});
 
-const elFormRef = ref();
+const elFormRef = ref([]);
 
 // =========== 表格控制部分 ===========
 const page = ref(1);
@@ -577,7 +577,7 @@ getTableData();
 // ============== 表格控制部分结束 ===============
 
 //===============calendar控制部分===========
-
+const range = ref(new Date())
 const dateMonth = ref(new Date());
 const todaylist = ref([]);
 
@@ -602,11 +602,11 @@ const getmonthlist = async () => {
   //经过一些复杂的变换，具体是chatgpt帮我改的
   var offset = firstDay.value.getTimezoneOffset() * 60000;
   daylistinfo.value.startMDate = new Date(
-    firstDay.value - offset
+    firstDay.value - offset -86400000
   ).toISOString();
   offset = lastDay.value.getTimezoneOffset() * 60000;
   daylistinfo.value.endMDate = new Date(lastDay.value - offset).toISOString();
-  //console.log(daylistinfo);
+  console.log(daylistinfo);
 
   const data = await getMeetcalendarList({
     page: 1, //后面如果需要在日历单元格内分页的话，可以用到
@@ -625,6 +625,7 @@ const filterByDay = (day) => {
   const year = date.getFullYear();
   const month = date.getMonth();
   const dayOfMonth = date.getDate();
+  console.log()
 
   return todaylist.value.filter((item) => {
     const itemDate = new Date(item.mDate);
@@ -702,7 +703,7 @@ const routeoptions = [
   {
     value: "人社专线",
     label: "人社专线",
-  },  
+  },
   {
     value: "其他",
     label: "其他",
@@ -800,7 +801,7 @@ const deleteMeetcalendarFunc = async (row) => {
       page.value--;
     }
     //getTableData();
-    
+
     getmonthlist();
   }
 };

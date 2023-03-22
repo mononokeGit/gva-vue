@@ -210,8 +210,8 @@ const meetoptions = [
 
 const deviceoptions = [
   {
-    value: "无需设备",
-    label: "无需设备",
+    value: "无需",
+    label: "无需",
   },
   {
     value: "话筒",

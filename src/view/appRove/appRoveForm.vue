@@ -18,23 +18,42 @@
               @change="handleDateChange"
           ></el-date-picker>
         </el-form-item>
-        <el-form-item label="会议室:" prop="approom">
-          <el-radio-group v-model.number="formData.approom">
-            <el-radio :label="1">会议室1</el-radio>
-            <el-radio :label="2">会议室2</el-radio>
-            <el-radio :label="3">会议室3</el-radio>
+        <el-form-item label="会议室:" prop="approom" >
+          <el-radio-group v-model.number="formData.approom" prop="approom">
+            <el-radio
+                v-for="trueroom in CanUseRoom"
+                :key="trueroom"
+                :label="trueroom"
+            >{{ trueroom }}
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="参会人数:" prop="appamount">
           <el-input v-model.number="formData.appamount" :clearable="true" placeholder="请输入"/>
         </el-form-item>
         <el-form-item label="会议类型:" prop="apptype">
-          <el-input v-model="formData.apptype" :clearable="true" placeholder="请输入"/>
+          <el-select v-model="formData.apptype" placeholder="选择会议类型">
+            <el-option
+                v-for="item in meetoptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item label="是否需要设备:" prop="appdevice">
-          <el-input v-model="formData.appdevice" :clearable="true" placeholder="请输入"/>
+          <el-checkbox-group v-model="changebox" @change="Changebox">
+            <el-checkbox
+                v-for="item in deviceoptions"
+                :key="item.value"
+                :label="item.label"
+            >
+              {{ item.value }}
+            </el-checkbox>
+          </el-checkbox-group>
         </el-form-item>
+
         <el-form-item label="备注:" prop="appremarks">
           <el-input v-model="formData.appremarks" :clearable="true" placeholder="请输入"/>
         </el-form-item>
@@ -53,6 +72,7 @@
         </el-form-item>
       </el-form>
     </div>
+    <appRoveFormList />
   </div>
 </template>
 
@@ -69,7 +89,11 @@ import {
   findApprove,
 } from '@/api/appRove'
 
+import appRoveFormList from '@/view/appRove/appRoveFormList.vue'
 
+import { useUserStore } from '@/pinia/modules/user'
+const userStore = useUserStore()
+console.log(userStore.userInfo.userName)
 //引入会议列表，查询某日期下是否有预约
 import {
   createMeetcalendar,
@@ -83,10 +107,9 @@ import {
 // 自动获取字典
 import { getDictFunc } from '@/utils/format'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { ref, reactive, watch } from 'vue'
+import { ElMessage , ElMessageBox} from 'element-plus'
+import { ref, reactive, watch, onMounted } from 'vue'
 import axios from 'axios'
-import { map } from 'core-js/internals/array-iteration'
 
 const route = useRoute()
 const router = useRouter()
@@ -101,9 +124,9 @@ const formData = ref({
   apptime: new Date(),
   appdevice: '',
   appremarks: '',
-  appstatus: '',
+  appstatus: '0',
   appopinion: '',
-  appother: '',
+  appother: userStore.userInfo.userName,
 })
 // 验证规则
 const rule = reactive({
@@ -114,13 +137,12 @@ const rule = reactive({
   }],
   approom: [{
     required: true,
-    message: '',
-    trigger: ['input', 'blur'],
+    message: '请选择会议室',
+    trigger: 'change',
   }],
 })
 
 const elFormRef = ref()
-
 // 初始化方法
 const init = async() => {
   // 建议通过url传参获取目标数据ID 调用 find方法进行查询数据操作 从而决定本页面是create还是update 以下为id作为url参数示例
@@ -138,28 +160,49 @@ const init = async() => {
 init()
 // 保存按钮
 
+
 //挑选日期时，用到的查询方法
+import moment from 'moment'
+
+const CanUseRoom = ref()
 const handleDateChange = async (newtime) => {
-  console.log(newtime)
-  let meet = await getMeetcalendarList({
+  const utcnewTime = moment.utc(newtime).format();
+  let timeArr = []
+  timeArr.push(moment(newtime).startOf('day').format())
+  timeArr.push(moment(newtime).hour(12).minute(0).second(0).format())
+  timeArr.push(moment(newtime).endOf('day').format())
+  //console.log(newtime,timeArr)
+  const utcTimes = timeArr.map((time) => {
+    return moment.utc(time).format();
+  });
+  console.log(utcTimes,utcnewTime)
+  const i = utcnewTime < utcTimes[1]? 0:1 //判断上下午
+  //使用会议日历页面的查询，根据条件限制，查询当前时间段正在使用的会议室，并提取为set
+  const meet = await getMeetcalendarList({
     page:1,
     pagesize:100,
-    startMDate:'2023-03-01T00:00:00.000Z',
-      endMDate:'2023-03-31T23:59:59.000Z',
+    startStime:utcTimes[i],
+    endStime:utcTimes[i+1],
   });
   console.log(meet)
-  let map = new Map()
-    for(let i=0;i<meet.data.list.length;i++){
-    var mRoom = meet.data.list[i].mRoom
-    if (!map.has(mRoom)){
-      map.set(mRoom,meet.data.list[i]);
-    }
-  }
-  var uniqueMRooms = new Set(map.keys());
-  console.log(uniqueMRooms,map)
+  const usingRooms = new Set(meet.data.list.map(item => item.mRoom));
+  //查询可供申请的会议室，并提取为set
+  const TrueRoom = await getBasicRoomSList({ page: 1, pageSize: 20,bstatus:true })
+  const CanUseRoomList = TrueRoom.data.list.map(item => item.broom);
+  //删除可申请会议室中的已用会议室
+  CanUseRoom.value = new Set(CanUseRoomList.filter(item => !usingRooms.has(item)));
+  console.log("可用会议室：",CanUseRoom.value)
 }
 
-//挑选完日期后，展示出当前可用的会议室
+
+import {
+  createBasicRoomS,
+  deleteBasicRoomS,
+  deleteBasicRoomSByIds,
+  updateBasicRoomS,
+  findBasicRoomS,
+  getBasicRoomSList,
+} from '@/api/basicRoomF'
 
 const save = async() => {
   elFormRef.value?.validate(async(valid) => {
@@ -185,6 +228,7 @@ const save = async() => {
                   `会议室申请：
 申请人/单位：${formData.value.appunit}\n
 使用领导：${formData.value.appleader}\n
+会议室：${formData.value.approom}\n
 使用时间：${formData.value.apptime}\n
 会议人数：${formData.value.appamount}\n
 会议类型：${formData.value.apptype}\n
@@ -211,6 +255,57 @@ const save = async() => {
 // 返回按钮
 const back = () => {
   router.go(-1)
+}
+
+const meetoptions = [
+  {
+    value: "本地会",
+    label: "本地会",
+  },
+  {
+    value: "视频会",
+    label: "视频会",
+  },
+  {
+    value: "借用",
+    label: "借用",
+  },
+  {
+    value: "其他",
+    label: "其他",
+  },
+];
+
+const deviceoptions = [
+  {
+    value: "无需",
+    label: "无需",
+  },
+  {
+    value: "话筒",
+    label: "话筒",
+  },
+  {
+    value: "大屏",
+    label: "大屏",
+  },
+  {
+    value: "激光笔",
+    label: "激光笔",
+  },
+  {
+    value: "翻页笔",
+    label: "翻页笔",
+  },
+  {
+    value: "其他",
+    label: "其他",
+  },
+];
+
+const changebox = ref([])
+const Changebox = (value)=>{
+  formData.value.appdevice = JSON.stringify(value).replace(/\[|\]|\"/g, '').replace(/,/g, ',')
 }
 
 </script>
