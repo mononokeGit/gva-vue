@@ -95,9 +95,11 @@
         </el-table-column>
         <el-table-column align="left" label="需要设备" prop="appdevice" width="auto"/>
         <el-table-column align="left" label="备注" prop="appremarks" width="auto"/>
-        <el-table-column align="left" label="审批状态" prop="appstatus" width="auto"/>
+        <el-table-column align="left" label="审批状态" prop="appstatus" width="auto">
+          <template #default="scope"> <el-switch v-model="scope.row.appstatus"  :active-value="1" :inactive-value="0" disabled /></template>
+        </el-table-column>
         <el-table-column align="left" label="审批意见" prop="appopinion" width="auto"/>
-        <el-table-column align="left" label="其他" prop="appother" width="auto"/>
+<!--        <el-table-column align="left" label="其他" prop="appother" width="auto"/>-->
         <!--        <el-table-column align="left" label="按钮组">
                     <template #default="scope">
                     <el-button type="primary" link icon="edit" size="small" class="table-button" @click="updateApproveFunc(scope.row)">变更</el-button>
@@ -151,9 +153,9 @@
         <el-form-item label="审批意见:" prop="appopinion">
           <el-input v-model="formData.appopinion" :clearable="true" placeholder="请输入"/>
         </el-form-item>
-        <el-form-item label="其他:" prop="appother">
+<!--        <el-form-item label="其他:" prop="appother">
           <el-input v-model="formData.appother" :clearable="true" placeholder="请输入"/>
-        </el-form-item>
+        </el-form-item>-->
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -184,7 +186,8 @@ import {
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ref, reactive } from 'vue'
+import { ref, reactive,computed } from 'vue'
+
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
@@ -404,6 +407,7 @@ const enterDialog = async() => {
     }
   })
 }
+
 </script>
 
 <style>
