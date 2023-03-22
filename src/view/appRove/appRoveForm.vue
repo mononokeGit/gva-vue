@@ -1,5 +1,6 @@
 <template>
   <div>
+    申请会议室
     <div class="gva-form-box">
       <el-form ref="elFormRef" :model="formData" :rules="rule" label-position="right" label-width="100px">
         <el-form-item label="申请部门:" prop="appunit">
@@ -67,12 +68,12 @@
           <el-input v-model="formData.appother" :clearable="true" placeholder="请输入"/>
         </el-form-item>-->
         <el-form-item>
-          <el-button size="small" type="primary" @click="save">保存</el-button>
+          <el-button size="small" type="primary" @click="save">提交</el-button>
           <el-button size="small" type="primary" @click="back">返回</el-button>
         </el-form-item>
       </el-form>
     </div>
-    <appRoveFormList />
+      <appRoveFormList />
   </div>
 </template>
 
@@ -226,15 +227,19 @@ const save = async() => {
             text: {
               content:
                   `会议室申请：
-申请人/单位：${formData.value.appunit}\n
-使用领导：${formData.value.appleader}\n
-会议室：${formData.value.approom}\n
-使用时间：${formData.value.apptime}\n
-会议人数：${formData.value.appamount}\n
-会议类型：${formData.value.apptype}\n
-需要设备：${formData.value.appdevice}\n
-其他事项：${formData.value.appremarks}\n
+
+申请人/单位：${formData.value.appunit}
+使用领导：${formData.value.appleader}
+会议室号：${formData.value.approom}
+使用时间：
+${formData.value.apptime.toLocaleString('zh-CN', {year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'long', hour: 'numeric', minute: 'numeric'})}
+会议人数：${formData.value.appamount}
+会议类型：${formData.value.apptype}
+需要设备：${formData.value.appdevice}
+其他事项：${formData.value.appremarks}
+
 请注意审批
+http://112.253.22.66:22207/#/layout/approve/applyroom
 `,
               mentioned_list: ['@all'],
             },
