@@ -1,6 +1,67 @@
 <template>
   <div>
-    审批记录查询
+    <div class="gva-table-box">
+      <!--        <div class="gva-btn-list">
+                  <el-button size="small" type="primary" icon="plus" @click="openDialog">新增</el-button>
+                  <el-popover v-model:visible="deleteVisible" placement="top" width="160">
+                  <p>确定要删除吗？</p>
+                  <div style="text-align: right; margin-top: 8px;">
+                      <el-button size="small" type="primary" link @click="deleteVisible = false">取消</el-button>
+                      <el-button size="small" type="primary" @click="onDelete">确定</el-button>
+                  </div>
+                  <template #reference>
+                      <el-button icon="delete" size="small" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="deleteVisible = true">删除</el-button>
+                  </template>
+                  </el-popover>
+              </div>-->
+      <el-table
+          ref="multipleTable"
+          :data="tableData"
+          row-key="ID"
+          style="width: 100%"
+          tooltip-effect="dark"
+          @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="55"/>
+        <el-table-column align="left" label="日期" width="180">
+          <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
+        </el-table-column>
+        <el-table-column align="left" label="申请部门" prop="appunit" width="auto"/>
+        <el-table-column align="left" label="参会领导" prop="appleader" width="auto"/>
+        <el-table-column align="left" label="会议室" prop="approom" width="auto"/>
+        <el-table-column align="left" label="参会人数" prop="appamount" width="auto"/>
+        <el-table-column align="left" label="会议类型" prop="apptype" width="auto"/>
+        <el-table-column align="left" label="使用时间" width="180">
+          <template #default="scope">{{ formatDate(scope.row.apptime) }}</template>
+        </el-table-column>
+        <el-table-column align="left" label="需要设备" prop="appdevice" width="auto"/>
+        <el-table-column align="left" label="备注" prop="appremarks" width="auto"/>
+        <el-table-column align="left" label="审批状态" prop="appstatus" width="120" >
+          <template #default="scope">
+              <el-tag :type="scope.row.appstatus === '未审批' ? 'warning' : scope.row.appstatus === '审批通过' ? 'success' : 'danger'">{{ scope.row.appstatus }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column align="left" label="审批意见" prop="appopinion" width="auto"/>
+        <el-table-column align="left" label="其他" prop="appother" width="auto"/>
+                <el-table-column align="left" label="按钮组">
+                    <template #default="scope">
+                    <el-button type="primary" link icon="edit" size="small" class="table-button" @click="updateApproveFunc(scope.row)">查看</el-button>
+<!--                    <el-button type="primary" link icon="delete" size="small" @click="deleteRow(scope.row)">删除</el-button>-->
+                    </template>
+                </el-table-column>
+      </el-table>
+      <div class="gva-pagination">
+        <el-pagination
+            :current-page="page"
+            :page-size="pageSize"
+            :page-sizes="[10, 30, 50, 100]"
+            :total="total"
+            layout="total, sizes, prev, pager, next, jumper"
+            @current-change="handleCurrentChange"
+            @size-change="handleSizeChange"
+        />
+      </div>
+    </div>
     <div class="gva-search-box">
       <el-form :inline="true" :model="searchInfo" class="demo-form-inline" @keyup.enter="onSubmit">
         <el-form-item label="申请时间">
@@ -10,16 +71,12 @@
         </el-form-item>
         <el-form-item label="申请部门">
           <el-input v-model="searchInfo.appunit" placeholder="搜索条件"/>
-
         </el-form-item>
         <el-form-item label="参会领导">
           <el-input v-model="searchInfo.appleader" placeholder="搜索条件"/>
-
         </el-form-item>
         <el-form-item label="会议室">
-
           <el-input v-model.number="searchInfo.approom" placeholder="搜索条件"/>
-
         </el-form-item>
         <!--        <el-form-item label="参会人数">
 
@@ -59,99 +116,39 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="gva-table-box">
-      <!--        <div class="gva-btn-list">
-                  <el-button size="small" type="primary" icon="plus" @click="openDialog">新增</el-button>
-                  <el-popover v-model:visible="deleteVisible" placement="top" width="160">
-                  <p>确定要删除吗？</p>
-                  <div style="text-align: right; margin-top: 8px;">
-                      <el-button size="small" type="primary" link @click="deleteVisible = false">取消</el-button>
-                      <el-button size="small" type="primary" @click="onDelete">确定</el-button>
-                  </div>
-                  <template #reference>
-                      <el-button icon="delete" size="small" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="deleteVisible = true">删除</el-button>
-                  </template>
-                  </el-popover>
-              </div>-->
-      <el-table
-          ref="multipleTable"
-          :data="tableData"
-          row-key="ID"
-          style="width: 100%"
-          tooltip-effect="dark"
-          @selection-change="handleSelectionChange"
-      >
-        <el-table-column type="selection" width="55"/>
-        <el-table-column align="left" label="日期" width="180">
-          <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
-        </el-table-column>
-        <el-table-column align="left" label="申请部门" prop="appunit" width="auto"/>
-        <el-table-column align="left" label="参会领导" prop="appleader" width="auto"/>
-        <el-table-column align="left" label="会议室" prop="approom" width="auto"/>
-        <el-table-column align="left" label="参会人数" prop="appamount" width="auto"/>
-        <el-table-column align="left" label="会议类型" prop="apptype" width="auto"/>
-        <el-table-column align="left" label="使用时间" width="180">
-          <template #default="scope">{{ formatDate(scope.row.apptime) }}</template>
-        </el-table-column>
-        <el-table-column align="left" label="需要设备" prop="appdevice" width="auto"/>
-        <el-table-column align="left" label="备注" prop="appremarks" width="auto"/>
-        <el-table-column align="left" label="审批状态" prop="appstatus" width="auto">
-          <template #default="scope"> <el-switch v-model="scope.row.appstatus"  :active-value="1" :inactive-value="0" disabled /></template>
-        </el-table-column>
-        <el-table-column align="left" label="审批意见" prop="appopinion" width="auto"/>
-<!--        <el-table-column align="left" label="其他" prop="appother" width="auto"/>-->
-        <!--        <el-table-column align="left" label="按钮组">
-                    <template #default="scope">
-                    <el-button type="primary" link icon="edit" size="small" class="table-button" @click="updateApproveFunc(scope.row)">变更</el-button>
-                    <el-button type="primary" link icon="delete" size="small" @click="deleteRow(scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>-->
-      </el-table>
-      <div class="gva-pagination">
-        <el-pagination
-            :current-page="page"
-            :page-size="pageSize"
-            :page-sizes="[10, 30, 50, 100]"
-            :total="total"
-            layout="total, sizes, prev, pager, next, jumper"
-            @current-change="handleCurrentChange"
-            @size-change="handleSizeChange"
-        />
-      </div>
-    </div>
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
-      <el-form ref="elFormRef" :model="formData" :rules="rule" label-position="right" label-width="80px">
+      <el-form ref="elFormRef" :model="formData" :rules="rule" label-position="right" label-width="95px">
         <el-form-item label="申请部门:" prop="appunit">
-          <el-input v-model="formData.appunit" :clearable="true" placeholder="请输入"/>
+          <el-input v-model="formData.appunit" :clearable="true" :readonly="true" />
         </el-form-item>
         <el-form-item label="参会领导:" prop="appleader">
-          <el-input v-model="formData.appleader" :clearable="true" placeholder="请输入"/>
+          <el-input v-model="formData.appleader" :clearable="true" :readonly="true" />
         </el-form-item>
         <el-form-item label="会议室:" prop="approom">
-          <el-input v-model.number="formData.approom" :clearable="true" placeholder="请输入"/>
+          <el-input v-model.number="formData.approom" :clearable="true" :readonly="true" />
         </el-form-item>
         <el-form-item label="参会人数:" prop="appamount">
-          <el-input v-model.number="formData.appamount" :clearable="true" placeholder="请输入"/>
+          <el-input v-model.number="formData.appamount" :clearable="true" :readonly="true" />
         </el-form-item>
         <el-form-item label="会议类型:" prop="apptype">
-          <el-input v-model="formData.apptype" :clearable="true" placeholder="请输入"/>
+          <el-input v-model="formData.apptype" :clearable="true" :readonly="true" />
         </el-form-item>
         <el-form-item label="使用时间:" prop="apptime">
-          <el-date-picker v-model="formData.apptime" :clearable="true" placeholder="选择日期" style="width:100%"
-                          type="date"
+          <el-date-picker v-model="formData.apptime" :clearable="true" :readonly="true" placeholder="选择日期" style="width:100%"
+                          type="datetime"
           />
         </el-form-item>
-        <el-form-item label="是否需要设备:" prop="appdevice">
-          <el-input v-model="formData.appdevice" :clearable="true" placeholder="请输入"/>
+        <el-form-item label="需要设备:" prop="appdevice">
+          <el-input v-model="formData.appdevice" :clearable="true" :readonly="true" />
         </el-form-item>
         <el-form-item label="备注:" prop="appremarks">
-          <el-input v-model="formData.appremarks" :clearable="true" placeholder="请输入"/>
+          <el-input v-model="formData.appremarks" :clearable="true" :readonly="true" />
         </el-form-item>
         <el-form-item label="审批状态:" prop="appstatus">
-          <el-input v-model="formData.appstatus" :clearable="true" placeholder="请输入"/>
+          <el-input v-model="formData.appstatus" :clearable="true" :readonly="true" />
         </el-form-item>
         <el-form-item label="审批意见:" prop="appopinion">
-          <el-input v-model="formData.appopinion" :clearable="true" placeholder="请输入"/>
+          <el-input v-model="formData.appopinion" :clearable="true" :readonly="true" />
         </el-form-item>
 <!--        <el-form-item label="其他:" prop="appother">
           <el-input v-model="formData.appother" :clearable="true" placeholder="请输入"/>
@@ -159,8 +156,8 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button size="small" @click="closeDialog">取 消</el-button>
-          <el-button size="small" type="primary" @click="enterDialog">确 定</el-button>
+          <el-button size="small" @click="closeDialog">关 闭</el-button>
+<!--          <el-button size="small" type="primary" @click="enterDialog">确 定</el-button>-->
         </div>
       </template>
     </el-dialog>
@@ -186,8 +183,7 @@ import {
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ref, reactive,computed } from 'vue'
-
+import { ref, reactive } from 'vue'
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
@@ -229,7 +225,9 @@ const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
-const searchInfo = ref({ appother: userStore.userInfo.userName })
+const searchInfo = ref({
+
+  appother: userStore.userInfo.userName })
 
 // 重置
 const onReset = () => {
@@ -407,7 +405,6 @@ const enterDialog = async() => {
     }
   })
 }
-
 </script>
 
 <style>

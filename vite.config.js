@@ -73,6 +73,13 @@ export default ({
           // eslint-disable-next-line no-shadow
           rewrite: (path) => path.replace(/^\/wxapi/, '')
         },
+        '/meetapi': {
+          target: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=f06198e2-25fe-4b7c-91a8-212eb9713343',
+          changeOrigin: true,
+          secure: false,
+          // eslint-disable-next-line no-shadow
+          rewrite: (path) => path.replace(/^\/meetapi/, '')
+        },
       },
     },
     build: {

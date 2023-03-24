@@ -125,7 +125,7 @@ const formData = ref({
   apptime: new Date(),
   appdevice: '',
   appremarks: '',
-  appstatus: '0',
+  appstatus: '未审批',
   appopinion: '',
   appother: userStore.userInfo.userName,
 })

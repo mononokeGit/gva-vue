@@ -16,21 +16,27 @@
 
         </el-form-item>
         <el-form-item label="会议室">
-            
+
              <el-input v-model.number="searchInfo.approom" placeholder="搜索条件" />
 
         </el-form-item>
         <el-form-item label="参会人数">
-            
+
              <el-input v-model.number="searchInfo.appamount" placeholder="搜索条件" />
 
         </el-form-item>
         <el-form-item label="会议类型">
-         <el-input v-model="searchInfo.apptype" placeholder="搜索条件" />
-
+          <el-select v-model="searchInfo.apptype" placeholder="选择会议类型">
+            <el-option
+                v-for="item in meetoptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="使用时间">
-            
+
             <el-date-picker v-model="searchInfo.startApptime" type="datetime" placeholder="搜索条件（起）"></el-date-picker>
             —
             <el-date-picker v-model="searchInfo.endApptime" type="datetime" placeholder="搜索条件（止）"></el-date-picker>
@@ -45,14 +51,20 @@
 
         </el-form-item>
         <el-form-item label="审批状态">
-         <el-input v-model="searchInfo.appstatus" placeholder="搜索条件" />
-
+          <el-select v-model="searchInfo.appstatus" placeholder="选择会议类型">
+            <el-option
+                v-for="item in typeoptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="审批意见">
          <el-input v-model="searchInfo.appopinion" placeholder="搜索条件" />
 
         </el-form-item>
-        <el-form-item label="其他">
+        <el-form-item label="申请账号">
          <el-input v-model="searchInfo.appother" placeholder="搜索条件" />
 
         </el-form-item>
@@ -88,22 +100,26 @@
         <el-table-column align="left" label="日期" width="180">
             <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
-        <el-table-column align="left" label="申请部门" prop="appunit" width="120" />
-        <el-table-column align="left" label="参会领导" prop="appleader" width="120" />
-        <el-table-column align="left" label="会议室" prop="approom" width="120" />
-        <el-table-column align="left" label="参会人数" prop="appamount" width="120" />
-        <el-table-column align="left" label="会议类型" prop="apptype" width="120" />
+        <el-table-column align="left" label="申请部门" prop="appunit" width="auto" />
+        <el-table-column align="left" label="参会领导" prop="appleader" width="auto" />
+        <el-table-column align="left" label="会议室" prop="approom" width="auto" />
+        <el-table-column align="left" label="参会人数" prop="appamount" width="auto" />
+        <el-table-column align="left" label="会议类型" prop="apptype" width="auto" />
          <el-table-column align="left" label="使用时间" width="180">
             <template #default="scope">{{ formatDate(scope.row.apptime) }}</template>
          </el-table-column>
-        <el-table-column align="left" label="是否需要设备" prop="appdevice" width="120" />
-        <el-table-column align="left" label="备注" prop="appremarks" width="120" />
-        <el-table-column align="left" label="审批状态" prop="appstatus" width="120" />
-        <el-table-column align="left" label="审批意见" prop="appopinion" width="120" />
-        <el-table-column align="left" label="其他" prop="appother" width="120" />
-        <el-table-column align="left" label="按钮组">
+        <el-table-column align="left" label="需要设备" prop="appdevice" width="auto" />
+        <el-table-column align="left" label="备注" prop="appremarks" width="auto" />
+          <el-table-column align="left" label="审批状态" prop="appstatus" width="auto">
             <template #default="scope">
-            <el-button type="primary" link icon="edit" size="small" class="table-button" @click="updateApproveFunc(scope.row)">变更</el-button>
+              <el-tag :type="scope.row.appstatus === '未审批' ? 'warning' : scope.row.appstatus === '审批通过' ? 'success' : 'danger'">{{ scope.row.appstatus }}</el-tag>
+            </template>
+          </el-table-column>
+        <el-table-column align="left" label="审批意见" prop="appopinion" width="auto" />
+        <el-table-column align="left" label="申请账号" prop="appother" width="auto" />
+        <el-table-column align="left" label="按钮组" width="150">
+            <template #default="scope">
+            <el-button type="primary" link icon="edit" size="small" class="table-button" @click="updateApproveFunc(scope.row)">审批</el-button>
             <el-button type="primary" link icon="delete" size="small" @click="deleteRow(scope.row)">删除</el-button>
             </template>
         </el-table-column>
@@ -121,7 +137,7 @@
         </div>
     </div>
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
-      <el-form :model="formData" label-position="right" ref="elFormRef" :rules="rule" label-width="80px">
+      <el-form :model="formData" label-position="right" ref="elFormRef" :rules="rule" label-width="90px">
         <el-form-item label="申请部门:"  prop="appunit" >
           <el-input v-model="formData.appunit" :clearable="true"  placeholder="请输入" />
         </el-form-item>
@@ -135,24 +151,38 @@
           <el-input v-model.number="formData.appamount" :clearable="true" placeholder="请输入" />
         </el-form-item>
         <el-form-item label="会议类型:"  prop="apptype" >
-          <el-input v-model="formData.apptype" :clearable="true"  placeholder="请输入" />
+          <el-select v-model="formData.apptype" placeholder="选择会议类型">
+            <el-option
+                v-for="item in meetoptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="使用时间:"  prop="apptime" >
-          <el-date-picker v-model="formData.apptime" type="date" style="width:100%" placeholder="选择日期" :clearable="true"  />
+          <el-date-picker v-model="formData.apptime" type="datetime" style="width:100%" placeholder="选择日期" :clearable="true"  />
         </el-form-item>
-        <el-form-item label="是否需要设备:"  prop="appdevice" >
+        <el-form-item label="需要设备:"  prop="appdevice" >
           <el-input v-model="formData.appdevice" :clearable="true"  placeholder="请输入" />
         </el-form-item>
         <el-form-item label="备注:"  prop="appremarks" >
           <el-input v-model="formData.appremarks" :clearable="true"  placeholder="请输入" />
         </el-form-item>
         <el-form-item label="审批状态:"  prop="appstatus" >
-          <el-input v-model="formData.appstatus" :clearable="true"  placeholder="请输入" />
+          <el-select v-model="formData.appstatus" placeholder="审批状态">
+            <el-option
+                v-for="item in typeoptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="审批意见:"  prop="appopinion" >
           <el-input v-model="formData.appopinion" :clearable="true"  placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="其他:"  prop="appother" >
+        <el-form-item label="申请账号:"  prop="appother" >
           <el-input v-model="formData.appother" :clearable="true"  placeholder="请输入" />
         </el-form-item>
       </el-form>
@@ -181,11 +211,19 @@ import {
   findApprove,
   getApproveList
 } from '@/api/appRove'
-
+import {
+  createMeetcalendar,
+  deleteMeetcalendar,
+  deleteMeetcalendarByIds,
+  updateMeetcalendar,
+  findMeetcalendar,
+  getMeetcalendarList,
+} from "@/api/meetcalendar";
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
+import axios from 'axios'
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
@@ -224,11 +262,15 @@ const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
-const searchInfo = ref({})
+const searchInfo = ref({
+  appstatus:'未审批',
+})
 
 // 重置
 const onReset = () => {
-  searchInfo.value = {}
+  searchInfo.value = {
+    appstatus:'未审批',
+  }
   getTableData()
 }
 
@@ -398,13 +440,94 @@ const enterDialog = async () => {
               if (res.code === 0) {
                 ElMessage({
                   type: 'success',
-                  message: '创建/更改成功'
+                  message: '审批完成'
                 })
+                if (formData.value.appstatus ==='审批通过'){
+                  //审批通过后，将会议信息写入日程表
+                  let calendares = await createMeetcalendar({
+                    mDate:formData.value.apptime,
+                    mRoom:formData.value.approom,
+                    mType:formData.value.apptype,
+                    stime:formData.value.apptime,
+                    mleader:formData.value.appleader,
+                    amount:formData.value.appamount,
+                    resposen:formData.value.appunit,
+                    remark:formData.value.appremarks,
+                  })
+                  axios
+                      .post('/meetapi', {
+                        msgtype: 'text',
+                        text: {
+                          content:
+                              `会议室审批通过
+
+申请人/单位：${formData.value.appunit}
+使用领导：${formData.value.appleader}
+会议室号：${formData.value.approom}
+使用时间：
+${formData.value.apptime}
+会议人数：${formData.value.appamount}
+会议类型：${formData.value.apptype}
+需要设备：${formData.value.appdevice}
+其他事项：${formData.value.appremarks}
+
+请注意筹备
+`,
+                          mentioned_list: ['@all'],
+                        },
+                      })
+                      .then((res) => {
+                        console.log(res.data.errcode)
+                        if (res.data.errcode == 0) {
+                          ElMessage({
+                            type: 'success',
+                            message: '已通知会务',
+                          })
+                        }
+                      })
+                }
+                //同时通知会服
+
                 closeDialog()
                 getTableData()
               }
       })
 }
+
+const meetoptions = [
+  {
+    value: "本地会",
+    label: "本地会",
+  },
+  {
+    value: "视频会",
+    label: "视频会",
+  },
+  {
+    value: "借用",
+    label: "借用",
+  },
+  {
+    value: "其他",
+    label: "其他",
+  },
+];
+
+const typeoptions = [
+  {
+    value:"未审批",
+    label:"未审批",
+  },
+  {
+    value:"审批通过",
+    label:"审批通过",
+  },
+  {
+    value:"审批驳回",
+    label:"审批驳回",
+  },
+];
+
 </script>
 
 <style>
